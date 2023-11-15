@@ -19,6 +19,12 @@ logger = logging.getLogger(__name__)
 
 
 class LLMTrainer(GeneralTorchTrainer):
+    def __init__(self, *args, **kwargs):
+        super(LLMTrainer, self).__init__(*args, **kwargs)
+        print("Load CustomSeq2SeqTrainer...")
+        self.step_count = 0
+        self.save_mode = True
+
     def _hook_on_fit_start_numerical_precision(self, ctx):
         if self.cfg.train.is_enable_half:
             if not ctx.cfg.llm.deepspeed.use:
@@ -44,6 +50,7 @@ class LLMTrainer(GeneralTorchTrainer):
                 ctx.fp16 = ctx.model_engine.fp16_enabled()
         else:
             # prepare model and optimizer
+            # print("prepare model and optimizer")
             ctx.model.to(ctx.device)
             if ctx.cur_mode in [MODE.TRAIN, MODE.FINETUNE]:
                 # Initialize optimizer here to avoid the reuse of optimizers
@@ -52,6 +59,26 @@ class LLMTrainer(GeneralTorchTrainer):
                     ctx.model, **ctx.cfg[ctx.cur_mode].optimizer)
                 ctx.scheduler = get_scheduler(
                     ctx.optimizer, **ctx.cfg[ctx.cur_mode].scheduler)
+        # print("Train number of epoch",ctx.num_train_epoch)
+        if self.save_mode:
+            # if (self.step_count%2)==0:
+            print("Freeze A")
+            for name, param in ctx.model.named_parameters():
+                if 'lora_B' in name:
+                    param.requires_grad = True
+                elif 'lora_A' in name:
+                    param.requires_grad = False
+            # else:
+            #     print("Freeze B")
+            #     for name, param in ctx.model.named_parameters():
+            #         if 'lora_B' in name:
+            #             param.requires_grad = False
+            #         elif 'lora_A' in name:
+            #             param.requires_grad = True
+        self.step_count += 1
+        # if ctx.cfg.llm.deepspeed.use:
+
+        
 
         # prepare statistics
         ctx.loss_batch_total = CtxVar(0., LIFECYCLE.ROUTINE)
@@ -125,6 +152,9 @@ class LLMTrainer(GeneralTorchTrainer):
         ctx.loss_regular_total += float(ctx.get("loss_regular", 0.))
 
     def _hook_on_fit_end(self, ctx):
+        # print("##############################################")
+        # print("##############################################")
+        # print("##############################################")
         avg_loss = 0 if float(
             ctx.num_samples) == 0 else ctx.loss_batch_total / float(
                 ctx.num_samples)
