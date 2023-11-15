@@ -61,21 +61,21 @@ class LLMTrainer(GeneralTorchTrainer):
                     ctx.optimizer, **ctx.cfg[ctx.cur_mode].scheduler)
         # print("Train number of epoch",ctx.num_train_epoch)
         if self.save_mode:
-            # if (self.step_count%2)==0:
-            print("Freeze A")
-            for name, param in ctx.model.named_parameters():
-                if 'lora_B' in name:
-                    param.requires_grad = True
-                elif 'lora_A' in name:
-                    param.requires_grad = False
-            # else:
-            #     print("Freeze B")
-            #     for name, param in ctx.model.named_parameters():
-            #         if 'lora_B' in name:
-            #             param.requires_grad = False
-            #         elif 'lora_A' in name:
-            #             param.requires_grad = True
-        self.step_count += 1
+            if (self.step_count%2)==0:
+                print("Freeze A")
+                for name, param in ctx.model.named_parameters():
+                    if 'lora_B' in name:
+                        param.requires_grad = True
+                    elif 'lora_A' in name:
+                        param.requires_grad = False
+            else:
+                print("Freeze B")
+                for name, param in ctx.model.named_parameters():
+                    if 'lora_B' in name:
+                        param.requires_grad = False
+                    elif 'lora_A' in name:
+                        param.requires_grad = True
+            self.step_count += 1
         # if ctx.cfg.llm.deepspeed.use:
 
         
