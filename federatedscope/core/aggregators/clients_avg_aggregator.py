@@ -15,6 +15,7 @@ class ClientsAvgAggregator(Aggregator):
         self.model = model
         self.device = device
         self.cfg = config
+        self.mode = True
 
     def aggregate(self, agg_info):
         """
@@ -26,6 +27,7 @@ class ClientsAvgAggregator(Aggregator):
         Returns:
             dict: the aggregated results
         """
+        # print("Aggregate!!!")
 
         models = agg_info["client_feedback"]
         recover_fun = agg_info['recover_fun'] if (
@@ -57,6 +59,33 @@ class ClientsAvgAggregator(Aggregator):
         else:
             raise ValueError("The file {} does NOT exist".format(path))
 
+    def extract_layer_number(self,string):
+        parts = string.split('.')
+        for i, part in enumerate(parts):
+            if part == 'h' and i + 1 < len(parts):
+                try:
+                    return int(parts[i + 1])
+                except ValueError:
+                    return None
+        return None
+        
+    def multiply_corresponding_params(self,params):
+        result = {}
+        keys = sorted(params.keys())
+        for i in range(0, len(keys), 2):
+            
+            key_a = keys[i]
+            key_b = keys[i + 1]
+            # print(key_a)
+            # print(params[key_a].size())
+            # print(key_b)
+            # print(params[key_b].size())
+            if self.extract_layer_number(key_a) == self.extract_layer_number(key_b):  # Check if the suffix (layer number) is the same
+                result[self.extract_layer_number(key_a)] = torch.matmul(params[key_b],params[key_a])
+            else:
+                print(f"Unmatched keys: {key_a} and {key_b}")
+        return result
+
     def _para_weighted_avg(self, models, recover_fun=None):
         """
         Calculates the weighted average of models.
@@ -66,33 +95,81 @@ class ClientsAvgAggregator(Aggregator):
             sample_size, _ = models[i]
             training_set_size += sample_size
 
-        sample_size, avg_model = models[0]
-        for key in avg_model:
+
+        if self.mode:
+            Results = []
+            # Multiply W = B*A
+            sample_size, avg_model = models[0]
             for i in range(len(models)):
-                local_sample_size, local_model = models[i]
+                Results.append(self.multiply_corresponding_params(models[i][1]))
+            # Avg of W
+            # print("multiply first params")
+            avg_w = Results[0]
+            for key in avg_w:
+                for i in range(len(models)):
+                    local_sample_size, local_model = models[i]
+                    if self.cfg.federate.ignore_weight:
+                        weight = 1.0 / len(models)
+                    elif self.cfg.federate.use_ss:
+                        # When using secret sharing, what the server receives
+                        # are sample_size * model_para
+                        weight = 1.0
+                    else:
+                        weight = local_sample_size / training_set_size
 
-                if self.cfg.federate.ignore_weight:
-                    weight = 1.0 / len(models)
-                elif self.cfg.federate.use_ss:
-                    # When using secret sharing, what the server receives
-                    # are sample_size * model_para
-                    weight = 1.0
-                else:
-                    weight = local_sample_size / training_set_size
+                    if i == 0:
+                        avg_w[key] = Results[i][key] * weight
+                    else:
+                        avg_w[key] += Results[i][key] * weight
 
-                if not self.cfg.federate.use_ss:
-                    local_model[key] = param2tensor(local_model[key])
-                if i == 0:
-                    avg_model[key] = local_model[key] * weight
-                else:
-                    avg_model[key] += local_model[key] * weight
+            # Matrix decomposition
+            for key in avg_w:
+                U, S, V = torch.svd(avg_w[key])
 
-            if self.cfg.federate.use_ss and recover_fun:
-                avg_model[key] = recover_fun(avg_model[key])
-                # When using secret sharing, what the server receives are
-                # sample_size * model_para
-                avg_model[key] /= training_set_size
-                avg_model[key] = torch.FloatTensor(avg_model[key])
+
+                U_reduced = U[:, :8]
+                S_reduced = torch.diag(S[:8])
+                V_reduced = V[:, :8]
+
+                B = torch.matmul(U_reduced, torch.sqrt(S_reduced))
+                A = torch.matmul(torch.sqrt(S_reduced), V_reduced.T)
+
+
+                key_a = 'base_model.model.transformer.h.'+str(key)+'.attn.c_attn.lora_A.default.weight'
+                key_b = 'base_model.model.transformer.h.'+str(key)+'.attn.c_attn.lora_B.default.weight'
+                avg_model[key_a] = A
+                avg_model[key_b] = B
+
+
+        else:
+
+            for key in avg_model:
+                for i in range(len(models)):
+                    local_sample_size, local_model = models[i]
+                    
+
+                    if self.cfg.federate.ignore_weight:
+                        weight = 1.0 / len(models)
+                    elif self.cfg.federate.use_ss:
+                        # When using secret sharing, what the server receives
+                        # are sample_size * model_para
+                        weight = 1.0
+                    else:
+                        weight = local_sample_size / training_set_size
+
+                    if not self.cfg.federate.use_ss:
+                        local_model[key] = param2tensor(local_model[key])
+                    if i == 0:
+                        avg_model[key] = local_model[key] * weight
+                    else:
+                        avg_model[key] += local_model[key] * weight
+
+                if self.cfg.federate.use_ss and recover_fun:
+                    avg_model[key] = recover_fun(avg_model[key])
+                    # When using secret sharing, what the server receives are
+                    # sample_size * model_para
+                    avg_model[key] /= training_set_size
+                    avg_model[key] = torch.FloatTensor(avg_model[key])
 
         return avg_model
 
