@@ -411,14 +411,14 @@ def load_external_data(config=None):
             dataset = datasets.load_dataset(path=config.data.root,
                                             name=name,
                                             **filtered_args)
-        if config.model.type.endswith('transformers'):
-            os.environ["TOKENIZERS_PARALLELISM"] = "false"
-            from transformers import AutoTokenizer
-            logger.info("To load huggingface tokenizer")
-            tokenizer = AutoTokenizer.from_pretrained(
-                config.model.type.split('@')[0],
-                local_files_only=True,
-                cache_dir=os.path.join(hugging_face_path, "transformers"))
+        # if config.model.type.endswith('transformers'):
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        from transformers import AutoTokenizer
+        logger.info("To load huggingface tokenizer")
+        tokenizer = AutoTokenizer.from_pretrained(
+            config.model.type.split('@')[0],
+            local_files_only=True,
+            cache_dir=os.path.join(hugging_face_path, "transformers"))
 
         for split in dataset:
             x_all = [i['sentence'] for i in dataset[split]]
@@ -438,6 +438,8 @@ def load_external_data(config=None):
                     element for i, element in enumerate(targets)
                     if i in selected_idx
                 ]
+            if tokenizer.pad_token is None:
+                tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
             x_all = tokenizer(x_all,
                               return_tensors='pt',
@@ -460,18 +462,18 @@ def load_external_data(config=None):
         }
         original_train_size = len(data_split_dict["train"])
 
-        if "half_val_dummy_test" in raw_args and raw_args[
-                "half_val_dummy_test"]:
+        # if "half_val_dummy_test" in raw_args and raw_args[
+        #         "half_val_dummy_test"]:
             # since the "test" set from GLUE dataset may be masked, we need to
             # submit to get the ground-truth, for fast FL experiments,
             # we split the validation set into two parts with the same size as
             # new test/val data
-            original_val = [(x, y) for x, y in zip(dataset['validation'][0],
-                                                   dataset['validation'][1])]
-            data_split_dict["val"], data_split_dict[
-                "test"] = original_val[:len(original_val) //
-                                       2], original_val[len(original_val) //
-                                                        2:]
+        original_val = [(x, y) for x, y in zip(dataset['validation'][0],
+                                                dataset['validation'][1])]
+        data_split_dict["val"], data_split_dict[
+            "test"] = original_val[:len(original_val) //
+                                    2], original_val[len(original_val) //
+                                                    2:]
         if "val_as_dummy_test" in raw_args and raw_args["val_as_dummy_test"]:
             # use the validation set as tmp test set,
             # and partial training set as validation set

@@ -13,13 +13,13 @@ def get_model_from_huggingface(model_name, config):
     Returns:
         AutoModelForCausalLM: A causal language model object.
     """
-    from transformers import AutoModelForCausalLM
+    from transformers import AutoModelForSequenceClassification#AutoModelForCausalLM
 
     kwargs = {}
     if len(config.llm.cache.model):
         kwargs['cache_dir'] = config.llm.cache.model
 
-    return AutoModelForCausalLM.from_pretrained(model_name, **kwargs)
+    return AutoModelForSequenceClassification.from_pretrained(model_name, **kwargs)#AutoModelForCausalLM.from_pretrained(model_name, **kwargs)
 
 
 def get_model_from_modelscope(model_name, config):

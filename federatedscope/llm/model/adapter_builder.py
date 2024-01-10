@@ -35,9 +35,16 @@ def enable_adapter(model, package, adapter, **kwargs):
         """
         from peft import get_peft_model, TaskType
         if adapter == 'lora':
+            # for name, param in model.named_parameters():
+            #     print(name)
             from peft import LoraConfig
-            peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, **kwargs)
+            # print("######################################################################")
+            # print("######################################################################")
+            # print("######################################################################")
+            peft_config = LoraConfig(task_type=TaskType.SEQ_CLS, **kwargs)
             model = get_peft_model(model, peft_config)
+            # for name, param in model.named_parameters():
+            #     print(name)
         elif adapter == 'prefix':
             from peft import PrefixTuningConfig
             peft_config = PrefixTuningConfig(task_type=TaskType.CAUSAL_LM,
@@ -273,6 +280,7 @@ class AdapterModel(nn.Module):
         grad_params = []
         for name, param in self.model.named_parameters():
             if param.requires_grad:
+                # print(name)
                 grad_params.append(name)
         model_state_dict = self.model.state_dict()
         new_state_dict = OrderedDict()

@@ -21,6 +21,9 @@ if os.environ.get('https_proxy'):
 if os.environ.get('http_proxy'):
     del os.environ['http_proxy']
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "9"
+
+
 if __name__ == '__main__':
     init_cfg = global_cfg.clone()
     args = parse_args()
@@ -52,6 +55,7 @@ if __name__ == '__main__':
     init_cfg.merge_from_other_cfg(modified_cfg)
 
     if init_cfg.federate.client_idx_for_local_train != 0:
+        print("init!!!")
         init_cfg.federate.client_num = 1
         new_data = {0: data[0]} if 0 in data.keys() else dict()
         new_data[1] = data[init_cfg.federate.client_idx_for_local_train]

@@ -165,15 +165,17 @@ class LLMDataset(Dataset):
                     max_length,) containing the padded labels.
         """
         examples = [s + t for s, t in zip(sources, targets)]
+        # print(targets)
         examples_tokenized, sources_tokenized = [
             self._tokenize_fn(strings, tokenizer)
             for strings in (examples, sources)
         ]
         input_ids = examples_tokenized["input_ids"]
-        labels = copy.deepcopy(input_ids)
-        for label, source_len in zip(labels,
-                                     sources_tokenized["input_ids_lens"]):
-            label[:source_len] = DefaultToken.IGNORE_INDEX.value
+        labels = [1 if element == 1 else 0 for element in targets]#copy.deepcopy(input_ids)
+        # print("source_len")
+        # 
+        # 
+        # source_len] = DefaultToken.IGNORE_INDEX.value
         return dict(input_ids=input_ids, labels=labels)
 
     def __len__(self):

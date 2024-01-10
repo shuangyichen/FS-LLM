@@ -15,7 +15,7 @@ class ClientsAvgAggregator(Aggregator):
         self.model = model
         self.device = device
         self.cfg = config
-        self.mode = True
+        self.mode = False
 
     def aggregate(self, agg_info):
         """
@@ -95,11 +95,11 @@ class ClientsAvgAggregator(Aggregator):
             sample_size, _ = models[i]
             training_set_size += sample_size
 
-
+        sample_size, avg_model = models[0]
         if self.mode:
             Results = []
             # Multiply W = B*A
-            sample_size, avg_model = models[0]
+            # sample_size, avg_model = models[0]
             for i in range(len(models)):
                 Results.append(self.multiply_corresponding_params(models[i][1]))
             # Avg of W

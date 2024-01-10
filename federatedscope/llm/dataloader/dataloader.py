@@ -44,17 +44,18 @@ class LLMDataCollator(object):
                 max_length)
                     indicating which tokens are not padding.
         """
-
+        # print("dataloader")
         input_ids, labels = tuple([instance[key] for instance in instances]
                                   for key in ("input_ids", "labels"))
         input_ids = torch.nn.utils.rnn.pad_sequence(
             input_ids,
             batch_first=True,
             padding_value=self.tokenizer.pad_token_id)
-        labels = torch.nn.utils.rnn.pad_sequence(
-            labels,
-            batch_first=True,
-            padding_value=DefaultToken.IGNORE_INDEX.value)
+        labels = torch.tensor(labels)
+        # labels = torch.nn.utils.rnn.pad_sequence(
+        #     labels,
+        #     batch_first=True,
+        #     padding_value=DefaultToken.IGNORE_INDEX.value)
         return dict(
             input_ids=input_ids,
             labels=labels,

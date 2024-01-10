@@ -23,7 +23,7 @@ class LLMTrainer(GeneralTorchTrainer):
         super(LLMTrainer, self).__init__(*args, **kwargs)
         print("Load CustomSeq2SeqTrainer...")
         self.step_count = 0
-        self.save_mode = True
+        self.save_mode = False
 
     def _hook_on_fit_start_numerical_precision(self, ctx):
         if self.cfg.train.is_enable_half:
@@ -64,6 +64,7 @@ class LLMTrainer(GeneralTorchTrainer):
             if (self.step_count%2)==0:
                 print("Freeze A")
                 for name, param in ctx.model.named_parameters():
+                    # print(name)
                     if 'lora_B' in name:
                         param.requires_grad = True
                     elif 'lora_A' in name:
@@ -84,13 +85,19 @@ class LLMTrainer(GeneralTorchTrainer):
         ctx.loss_batch_total = CtxVar(0., LIFECYCLE.ROUTINE)
         ctx.loss_regular_total = CtxVar(0., LIFECYCLE.ROUTINE)
         ctx.num_samples = CtxVar(0, LIFECYCLE.ROUTINE)
+        ctx.num_correct = CtxVar(0, LIFECYCLE.ROUTINE)
+        ctx.batch_correct = CtxVar(0, LIFECYCLE.ROUTINE)
         ctx.ys_true = CtxVar([], LIFECYCLE.ROUTINE)
         ctx.ys_prob = CtxVar([], LIFECYCLE.ROUTINE)
 
     def _hook_on_batch_forward(self, ctx):
         input_ids = ctx.data_batch['input_ids'].to(ctx.device)
-        labels = ctx.data_batch['labels'].to(ctx.device)
         attention_mask = ctx.data_batch['attention_mask'].to(ctx.device)
+        labels = ctx.data_batch['labels'].to(ctx.device)
+        # print(input_ids.shape)
+        # print(input_ids)
+        # print(labels.shape)
+        # print(labels)
 
         if ctx.cfg.llm.deepspeed.use:
             outputs = ctx.model_engine(input_ids=input_ids,
@@ -103,6 +110,17 @@ class LLMTrainer(GeneralTorchTrainer):
 
         logits = outputs.logits
         loss = outputs.loss
+        # print(logits.shape)
+
+        _, predicted = torch.max(logits, 1)
+        correct_predictions = (predicted == labels).sum().item()
+        # print("Accuracy:",(relevant_predictions == relevant_labels).float().mean().item())
+
+
+
+        # labels_flat = labels.view(-1)
+        # predictions_flat = torch.argmax(logits_flat, dim=1)
+        # correct_predictions = torch.sum(predictions_flat == labels_flat)
 
         if torch.isnan(loss):
             ctx.skip_this_batch = CtxVar(True, LIFECYCLE.BATCH)
@@ -117,6 +135,8 @@ class LLMTrainer(GeneralTorchTrainer):
 
         ctx.loss_batch = CtxVar(loss, LIFECYCLE.BATCH)
         ctx.batch_size = CtxVar(len(labels), LIFECYCLE.BATCH)
+        ctx.batch_correct= CtxVar(correct_predictions, LIFECYCLE.BATCH)
+
 
     def _hook_on_batch_backward(self, ctx):
         if ctx.skip_this_batch:
@@ -150,6 +170,7 @@ class LLMTrainer(GeneralTorchTrainer):
         ctx.num_samples += ctx.batch_size
         ctx.loss_batch_total += ctx.loss_batch.item() * ctx.batch_size
         ctx.loss_regular_total += float(ctx.get("loss_regular", 0.))
+        ctx.num_correct += ctx.batch_correct
 
     def _hook_on_fit_end(self, ctx):
         # print("##############################################")
@@ -158,10 +179,15 @@ class LLMTrainer(GeneralTorchTrainer):
         avg_loss = 0 if float(
             ctx.num_samples) == 0 else ctx.loss_batch_total / float(
                 ctx.num_samples)
+        # print(ctx.num_correct)
+
+        accuracy = float(ctx.num_correct)/float(
+                ctx.num_samples)
         eval_results = {
             f'{ctx.cur_split}_loss': ctx.loss_batch_total,
             f'{ctx.cur_split}_total': ctx.num_samples,
             f'{ctx.cur_split}_avg_loss': avg_loss,
+            f'{ctx.cur_split}_acc':accuracy,
         }
         setattr(ctx, 'eval_metrics', eval_results)
 

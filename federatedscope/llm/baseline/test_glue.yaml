@@ -1,4 +1,43 @@
-# For this configuration, you might need a GPU with at least 32GB of video memory to run.
+# use_gpu: True
+# device: 0
+# early_stop:
+#   patience: 10
+# federate:
+#   mode: standalone
+#   client_num: 1
+#   total_round_num: 200
+#   save_to: "gpt2.ckpt"
+#   share_local_model: False
+#   online_aggr: False
+# data:
+#   root: 'glue'
+#   type: 'sst2@huggingface_datasets'
+#   args: [{'max_len': 128}]
+#   splitter: 'iid'
+#   splitter_args: [{'alpha': 1.0}]
+# llm:
+#   tok_len: 1000
+#   chat:
+#     max_len: 1000
+# dataloader:
+#   batch_size: 200
+# model:
+#   type: 'roberta-base@huggingface_llm'
+# train:
+#   local_update_steps: 10
+#   batch_or_epoch: batch
+#   optimizer:
+#     lr: 0.001
+#     weight_decay: 0.0
+# criterion:
+#   type: CrossEntropyLoss
+# trainer:
+#   type: llmtrainer
+# eval:
+#   freq: 10
+#   metrics: ['loss']
+
+  # For this configuration, you might need a GPU with at least 32GB of video memory to run.
 
 # Whether to use GPU
 use_gpu: True
@@ -17,27 +56,37 @@ federate:
   # Number of communication round
   total_round_num: 1000
   # Saving path for ckpt
-  save_to: "llama_rosetta_9_fed.ckpt"
+  save_to: "gpt2-sst2-fed.ckpt"
   # Number of dataset being split
   client_num: 3
   # Enable for saving memory, all workers share the same model instance
   share_local_model: True
 
 # Dataset related options
+# data:
+#   # Root directory where the data stored
+#   root: 'glue'
+#   # Dataset name
+#   type: 'sst2@huggingface_datasets'
+#   # Train/val/test splits
+#   splits: [0.85,0.1,0.05]
+#   args: [{'load_disk_dir': '/scratch/ondemand28/schen/csy/LoRA/new/FS-LLM/sst2/','max_len': 128}]
+#   # Use meta inforamtion to split `rosetta_alpaca`
+#   splitter: 'iid'
+#   splitter_args: [{'alpha': 1.0}]
 data:
   # Root directory where the data stored
-  root: data/
+  root: sst2/
   # Dataset name
-  type: 'rosetta_alpaca@llm'
+  type: 'sst2.json@llm'
   # Train/val/test splits
   splits: [0.89,0.1,0.01]
   # Use meta inforamtion to split `rosetta_alpaca`
-  splitter: 'meta'
-
+  splitter: 'iid'
 # LLM related options
 llm:
   # Max token length for model input (training)
-  tok_len: 1000
+  tok_len: 128
   # ChatBot related options
   chat:
     # Max token length for model input (inference)
@@ -52,17 +101,17 @@ llm:
     # Set ture to enable PEFT fine-tuning
     use: True
     # Args for PEFT fine-tuning
-    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
+    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 8, 'lora_dropout': 0.1 } ]
 
 # DataLoader related options
 dataloader:
   # Batch size for iter loader
-  batch_size: 1
+  batch_size: 128
 
 # Model related options
 model:
   # Model type (format: {MODEL_REPO}@huggingface_llm)
-  type: 'gpt2@huggingface_llm'
+  type: 'roberta-large@huggingface_llm'
 
 # Train related options
 train:
@@ -73,7 +122,7 @@ train:
   # Optimizer related options
   optimizer:
     # Learning rate
-    lr: 0.001
+    lr: 0.01
     # Weight decay
     weight_decay: 0.0
   # Set ture to enable `model.half()`
@@ -89,6 +138,6 @@ eval:
   # Frequency of evaluation
   freq: 10
   # Evaluation metrics
-  metrics: ['loss']
+  metrics: ['loss','acc']
   # Set key to track best model
   best_res_update_round_wise_key: val_loss
