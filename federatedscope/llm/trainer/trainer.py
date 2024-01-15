@@ -69,6 +69,9 @@ class LLMTrainer(GeneralTorchTrainer):
                         param.requires_grad = True
                     elif 'lora_A' in name:
                         param.requires_grad = False
+                    elif 'classifier' in name:
+                        param.requires_grad = False
+                        
             else:
                 print("Freeze B")
                 for name, param in ctx.model.named_parameters():
@@ -76,6 +79,8 @@ class LLMTrainer(GeneralTorchTrainer):
                         param.requires_grad = False
                     elif 'lora_A' in name:
                         param.requires_grad = True
+                    elif 'classifier' in name:
+                        param.requires_grad = False
             self.step_count += 1
         # if ctx.cfg.llm.deepspeed.use:
 

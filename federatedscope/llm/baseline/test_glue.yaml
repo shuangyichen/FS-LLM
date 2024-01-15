@@ -56,7 +56,7 @@ federate:
   # Number of communication round
   total_round_num: 1000
   # Saving path for ckpt
-  save_to: "gpt2-sst2-fed.ckpt"
+  save_to: "roberta-sst2-fed.ckpt"
   # Number of dataset being split
   client_num: 3
   # Enable for saving memory, all workers share the same model instance
@@ -95,7 +95,7 @@ llm:
     max_history_len: 10
   # Path for store model cache, default in `~/.cache/`
   cache:
-    model: ''
+    model: '/scratch/ondemand28/schen/csy/FS-LLM/model'
   # PEFT related options
   adapter:
     # Set ture to enable PEFT fine-tuning
@@ -106,12 +106,12 @@ llm:
 # DataLoader related options
 dataloader:
   # Batch size for iter loader
-  batch_size: 128
+  batch_size: 64
 
 # Model related options
 model:
   # Model type (format: {MODEL_REPO}@huggingface_llm)
-  type: 'roberta-large@huggingface_llm'
+  type: 'roberta-base@huggingface_llm'
 
 # Train related options
 train:
