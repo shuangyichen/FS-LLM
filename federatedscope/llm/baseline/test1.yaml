@@ -30,7 +30,7 @@ data:
   # Dataset name
   type: 'gsm8k@llm'
   # Train/val/test splits
-  splits: [0.89,0.1,0.01]
+  splits: [0.998,0.001,0.001]
   # Use meta inforamtion to split `rosetta_alpaca`
   splitter: 'iid'
 
@@ -52,7 +52,7 @@ llm:
     # Set ture to enable PEFT fine-tuning
     use: True
     # Args for PEFT fine-tuning
-    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
+    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 32, 'lora_dropout': 0.0 } ]
 
 # DataLoader related options
 dataloader:
