@@ -21,6 +21,20 @@ class DefaultToken(Enum):
     IGNORE_INDEX = -100
 
 
+PROMPT_2_DICT = {
+    "prompt_input": (
+        "Below is an instruction that describes a task, "
+        "paired with an input that provides further context. "
+        "Write a response that appropriately completes the request.\n\n"
+        "### Instruction:\n{instruction}\n\n### Input:"
+        "\n{input}\n\n### Response:"),
+    "prompt_no_input": (
+        "Below is an instruction that describes a task. "
+        "Write a response that appropriately completes the request.\n\n"
+        "### Instruction:\n{instruction}\n\n### Response:"),
+}
+
+
 PROMPT_DICT = {
     "prompt_input": (
         "Below is an instruction that describes a task, "
@@ -82,11 +96,14 @@ class LLMDataset(Dataset):
         """
         super(LLMDataset, self).__init__()
 
-        sources = [
-            prompt_input.format_map(example) if example.get("input", "") != ""
-            else prompt_no_input.format_map(example)
+        #sources = [
+        #    prompt_input.format_map(example) if example.get("input", "") != ""
+        #    else prompt_no_input.format_map(example)
+        #    for example in list_data_dict
+        #]
+        sources = [f"{example['input']}"
             for example in list_data_dict
-        ]
+                ]
         targets = [
             f"{example['output']}{tokenizer.eos_token}"
             for example in list_data_dict
@@ -164,14 +181,28 @@ class LLMDataset(Dataset):
                 - labels: A list of torch.LongTensor objects of shape (
                     max_length,) containing the padded labels.
         """
-        examples = [s + t for s, t in zip(sources, targets)]
-        # print(targets)
-        examples_tokenized, sources_tokenized = [
-            self._tokenize_fn(strings, tokenizer)
-            for strings in (examples, sources)
+        examples = [s for s in sources]
+        #examples = [s + t for s, t in zip(sources, targets)]
+        print(examples)
+        #examples_tokenized, sources_tokenized = [
+        #    self._tokenize_fn(example, tokenizer)
+        #    for example in examples
+        #]
+        tokenized_list = [tokenizer(
+                example,
+                return_tensors="pt",
+                padding="longest",
+                max_length=tokenizer.model_max_length,
+                truncation=True) for example in examples]
+        input_ids = [
+            tokenized.input_ids[0] for tokenized in tokenized_list
         ]
-        input_ids = examples_tokenized["input_ids"]
-        labels = [1 if element == 1 else 0 for element in targets]#copy.deepcopy(input_ids)
+        #examples_tokenized, sources_tokenized = [
+        #    self._tokenize_fn(strings, tokenizer)
+        #    for strings in (examples, sources)
+        #]
+        #input_ids = examples_tokenized["input_ids"]
+        labels = [0 if element == '0</s>' else 1 for element in targets]#copy.deepcopy(input_ids)
         # print("source_len")
         # 
         # 

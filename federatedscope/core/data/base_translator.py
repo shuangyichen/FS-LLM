@@ -79,15 +79,22 @@ class BaseDataTranslator:
             assert len(dataset) == len(['train', 'val', 'test']), error_msg
             return [dataset[0], dataset[1], dataset[2]]
 
-        index = np.random.permutation(np.arange(len(dataset)))
-        train_size = int(splits[0] * len(dataset))
-        val_size = int(splits[1] * len(dataset))
+        #index = np.random.permutation(np.arange(len(dataset)))
+        #train_size = int(splits[0] * len(dataset))
+        #val_size = int(splits[1] * len(dataset))
+        train_size = 66675
+        val_size = 674
+        test_size = 872
+
 
         if isinstance(dataset, Dataset):
-            train_dataset = Subset(dataset, index[:train_size])
-            val_dataset = Subset(dataset,
-                                 index[train_size:train_size + val_size])
-            test_dataset = Subset(dataset, index[train_size + val_size:])
+            train_dataset = Subset(dataset, np.random.permutation(np.arange(0, train_size)))
+            val_dataset = Subset(dataset, np.random.permutation(np.arange(train_size, train_size + val_size)))
+            test_dataset = Subset(dataset, np.random.permutation(np.arange(train_size + val_size, train_size + val_size + test_size)))
+            #train_dataset = Subset(dataset, index[:train_size])
+            #val_dataset = Subset(dataset,
+            #                     index[train_size:train_size + val_size])
+            #test_dataset = Subset(dataset, index[train_size + val_size:])
         else:
             train_dataset = [dataset[x] for x in index[:train_size]]
             val_dataset = [

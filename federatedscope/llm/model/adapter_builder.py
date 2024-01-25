@@ -279,8 +279,11 @@ class AdapterModel(nn.Module):
         """
         grad_params = []
         for name, param in self.model.named_parameters():
+            #if 'classifier' in name:
+            #    print(name)
+            #    print(param)
             if param.requires_grad:
-                # print(name)
+                #print(name)
                 grad_params.append(name)
         model_state_dict = self.model.state_dict()
         new_state_dict = OrderedDict()

@@ -21,7 +21,7 @@ if os.environ.get('https_proxy'):
 if os.environ.get('http_proxy'):
     del os.environ['http_proxy']
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "9"
+#os.environ["CUDA_VISIBLE_DEVICES"] = "9"
 
 
 if __name__ == '__main__':

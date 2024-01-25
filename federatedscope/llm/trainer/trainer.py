@@ -66,11 +66,13 @@ class LLMTrainer(GeneralTorchTrainer):
                 for name, param in ctx.model.named_parameters():
                     # print(name)
                     if 'lora_B' in name:
+                        print(name)
+                        print(param)
                         param.requires_grad = True
                     elif 'lora_A' in name:
                         param.requires_grad = False
-                    elif 'classifier' in name:
-                        param.requires_grad = False
+                    #elif 'classifier' in name:
+                    #    param.requires_grad = False
                         
             else:
                 print("Freeze B")
@@ -79,8 +81,8 @@ class LLMTrainer(GeneralTorchTrainer):
                         param.requires_grad = False
                     elif 'lora_A' in name:
                         param.requires_grad = True
-                    elif 'classifier' in name:
-                        param.requires_grad = False
+                    #elif 'classifier' in name:
+                    #    param.requires_grad = False
             self.step_count += 1
         # if ctx.cfg.llm.deepspeed.use:
 
@@ -100,7 +102,7 @@ class LLMTrainer(GeneralTorchTrainer):
         attention_mask = ctx.data_batch['attention_mask'].to(ctx.device)
         labels = ctx.data_batch['labels'].to(ctx.device)
         # print(input_ids.shape)
-        # print(input_ids)
+        #print(input_ids)
         # print(labels.shape)
         # print(labels)
 
@@ -115,9 +117,11 @@ class LLMTrainer(GeneralTorchTrainer):
 
         logits = outputs.logits
         loss = outputs.loss
-        # print(logits.shape)
+        #print(logits)
 
         _, predicted = torch.max(logits, 1)
+        #print("labels",labels)
+        #print("predict",predicted)
         correct_predictions = (predicted == labels).sum().item()
         # print("Accuracy:",(relevant_predictions == relevant_labels).float().mean().item())
 
@@ -137,7 +141,8 @@ class LLMTrainer(GeneralTorchTrainer):
 
         ctx.y_true = CtxVar(labels, LIFECYCLE.BATCH)
         ctx.y_prob = CtxVar(logits, LIFECYCLE.BATCH)
-
+        #print("correct predictions,", correct_predictions)
+        #print("samples", len(labels))
         ctx.loss_batch = CtxVar(loss, LIFECYCLE.BATCH)
         ctx.batch_size = CtxVar(len(labels), LIFECYCLE.BATCH)
         ctx.batch_correct= CtxVar(correct_predictions, LIFECYCLE.BATCH)
