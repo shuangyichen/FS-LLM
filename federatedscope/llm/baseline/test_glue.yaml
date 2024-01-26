@@ -95,13 +95,13 @@ llm:
     max_history_len: 10
   # Path for store model cache, default in `~/.cache/`
   cache:
-    model: '/scratch/ondemand28/schen/csy/FS-LLM/model'
+    model: '/h/chensy/FS-LLM/model/'
   # PEFT related options
   adapter:
     # Set ture to enable PEFT fine-tuning
     use: True
     # Args for PEFT fine-tuning
-    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 8, 'lora_dropout': 0.1 } ]
+    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
 
 # DataLoader related options
 dataloader:
@@ -111,18 +111,19 @@ dataloader:
 # Model related options
 model:
   # Model type (format: {MODEL_REPO}@huggingface_llm)
-  type: 'roberta-base@huggingface_llm'
+  type: 'roberta-large@huggingface_llm'
 
 # Train related options
 train:
   # Number of local update steps
-  local_update_steps: 30
+  local_update_steps: 10
   # `batch` or `epoch` for local_update_steps
   batch_or_epoch: batch
   # Optimizer related options
   optimizer:
     # Learning rate
-    lr: 0.01
+    lr: 0.005
+    #type: Adam
     # Weight decay
     weight_decay: 0.0
   # Set ture to enable `model.half()`
@@ -132,12 +133,14 @@ train:
 trainer:
   # Trainer type
   type: llmtrainer
-
+criterion:
+  type: CrossEntropyLoss
 # Evaluation related options
 eval:
   # Frequency of evaluation
-  freq: 10
+  freq: 2
   # Evaluation metrics
   metrics: ['loss','acc']
   # Set key to track best model
   best_res_update_round_wise_key: val_loss
+
