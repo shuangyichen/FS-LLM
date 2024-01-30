@@ -41,7 +41,7 @@ def enable_adapter(model, package, adapter, **kwargs):
             # print("######################################################################")
             # print("######################################################################")
             # print("######################################################################")
-            peft_config = LoraConfig(task_type=TaskType.SEQ_CLS, **kwargs)
+            peft_config = LoraConfig(task_type=TaskType.SEQ_CLS, target_modules=["layer.20.attention.self.value","layer.21.attention.self.value","layer.22.attention.self.value"],  **kwargs)
             model = get_peft_model(model, peft_config)
             # for name, param in model.named_parameters():
             #     print(name)

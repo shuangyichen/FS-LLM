@@ -18,8 +18,10 @@ def get_model_from_huggingface(model_name, config):
     kwargs = {}
     if len(config.llm.cache.model):
         kwargs['cache_dir'] = config.llm.cache.model
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2,**kwargs)
+    # print(model)
 
-    return RobertaForSequenceClassification.from_pretrained(model_name, num_labels=2,**kwargs)#AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2,**kwargs)#AutoModelForCausalLM.from_pretrained(model_name, **kwargs)
+    return model#AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2,**kwargs)#AutoModelForCausalLM.from_pretrained(model_name, **kwargs)
 
 
 def get_model_from_modelscope(model_name, config):
