@@ -61,6 +61,31 @@ class LLMTrainer(GeneralTorchTrainer):
                     ctx.optimizer, **ctx.cfg[ctx.cur_mode].scheduler)
         # print("Train number of epoch",ctx.num_train_epoch)
         if self.save_mode:
+            # layer_groups = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15], [16, 17, 18, 19], [20, 21, 22, 23]]
+
+            # # Determine the group to update based on the current step
+            # group_index = (self.step_count // 2) % len(layer_groups)
+            # current_group = layer_groups[group_index]
+            # print("current group", current_group)
+
+            # # Determine whether to update matrix A or B
+            # update_A = (self.step_count % 2) == 1
+
+            # # Iterate over parameters and update as required
+            # for name, param in ctx.model.named_parameters():
+            #     if any(str(layer) in name for layer in current_group):
+            #         if update_A:
+            #             if 'lora_A' in name:
+            #                 param.requires_grad = True
+            #             elif 'lora_B' in name:
+            #                 param.requires_grad = False
+            #         else:
+            #             if 'lora_B' in name:
+            #                 param.requires_grad = True
+            #             elif 'lora_A' in name :
+            #                 param.requires_grad = False
+
+
             if (self.step_count%2)==0:
                 print("Freeze A")
                 for name, param in ctx.model.named_parameters():
@@ -82,13 +107,13 @@ class LLMTrainer(GeneralTorchTrainer):
                     # elif 'classifier' in name:
                     #    param.requires_grad = False
         if self.step_count==0:
-            print("Freeze A")
+            print("Freeze classifier")
             for name, param in ctx.model.named_parameters():
                 # print(name)
-                if 'lora_B' in name:
-                    param.requires_grad = True
-                if 'lora_A' in name:
-                    param.requires_grad = False
+                # if 'lora_B' in name:
+                #     param.requires_grad = True
+                # if 'lora_A' in name:
+                #     param.requires_grad = False
                 if 'classifier' in name:
                     param.requires_grad = False
         self.step_count += 1

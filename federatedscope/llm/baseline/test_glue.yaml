@@ -101,7 +101,7 @@ llm:
     # Set ture to enable PEFT fine-tuning
     use: True
     # Args for PEFT fine-tuning
-    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
+    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 2, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
 
 # DataLoader related options
 dataloader:
@@ -116,17 +116,21 @@ model:
 # Train related options
 train:
   # Number of local update steps
-  local_update_steps: 10
+  local_update_steps: 20
   # `batch` or `epoch` for local_update_steps
   batch_or_epoch: batch
   # Optimizer related options
   optimizer:
     # Learning rate
-    lr: 0.005
+    lr: 0.01
     #type: Adam
     # Weight decay
     weight_decay: 0.0
   # Set ture to enable `model.half()`
+  # scheduler:
+  #   type: StepLR
+  #   step_size: 2000
+  #   gamma: 0.5
   is_enable_half: True
 
 # Trainer related options
@@ -135,6 +139,9 @@ trainer:
   type: llmtrainer
 criterion:
   type: CrossEntropyLoss
+# regularizer:
+#   type: proximal_regularizer
+#   mu: 0.01
 # Evaluation related options
 eval:
   # Frequency of evaluation
