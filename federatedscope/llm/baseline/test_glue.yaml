@@ -131,7 +131,7 @@ train:
   #   type: StepLR
   #   step_size: 2000
   #   gamma: 0.5
-  is_enable_half: True
+  is_enable_half: False
 
 # Trainer related options
 trainer:
@@ -141,7 +141,7 @@ criterion:
   type: CrossEntropyLoss
 # regularizer:
 #   type: proximal_regularizer
-#   mu: 0.01
+#   mu: 0.1
 # Evaluation related options
 eval:
   # Frequency of evaluation
