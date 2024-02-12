@@ -15,7 +15,7 @@ class ClientsAvgAggregator(Aggregator):
         self.model = model
         self.device = device
         self.cfg = config
-        self.mode = True
+        self.mode = False
 
     def aggregate(self, agg_info):
         """

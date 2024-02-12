@@ -104,12 +104,15 @@ class LLMDataset(Dataset):
         sources = [f"{example['input']}"
             for example in list_data_dict
                 ]
+        sources2 = [f"{example['category']}"
+            for example in list_data_dict
+                ]
         targets = [
             f"{example['output']}{tokenizer.eos_token}"
             for example in list_data_dict
         ]
 
-        data_dict = self.preprocess(sources, targets, tokenizer)
+        data_dict = self.preprocess(sources, sources2, targets, tokenizer)
 
         self.input_ids = data_dict["input_ids"]
         self.labels = data_dict["labels"]
@@ -182,6 +185,7 @@ class LLMDataset(Dataset):
                     max_length,) containing the padded labels.
         """
         examples = [s for s in sources]
+        examples2 = [s for s in sources2]
         #examples = [s + t for s, t in zip(sources, targets)]
         #print(examples)
         #examples_tokenized, sources_tokenized = [
@@ -190,10 +194,11 @@ class LLMDataset(Dataset):
         #]
         tokenized_list = [tokenizer(
                 example,
+                examples2[idx],
                 return_tensors="pt",
                 padding="longest",
                 max_length=tokenizer.model_max_length,
-                truncation=True) for example in examples]
+                truncation="only_first") for idx, example in enumerate(examples)]
         input_ids = [
             tokenized.input_ids[0] for tokenized in tokenized_list
         ]
@@ -202,7 +207,8 @@ class LLMDataset(Dataset):
         #    for strings in (examples, sources)
         #]
         #input_ids = examples_tokenized["input_ids"]
-        labels = [0 if element == '0</s>' else 1 for element in targets]#copy.deepcopy(input_ids)
+        labels = [0 if element == '0</s>' else 1 if element == '1</s>' else 2 for element in targets]#copy.deepcopy(input_ids)
+        # labels = [0 if element == '0</s>' else 1 for element in targets]#copy.deepcopy(input_ids)
         # print("source_len")
         # 
         # 
