@@ -167,7 +167,7 @@ class LLMDataset(Dataset):
             labels_lens=labels_lens,
         )
 
-    def preprocess(self, sources, targets, tokenizer):
+    def preprocess(self, sources, sources2, targets, tokenizer):
         """
         Preprocesses the sources and targets using the given tokenizer.
 
