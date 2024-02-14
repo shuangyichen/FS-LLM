@@ -56,7 +56,7 @@ federate:
   # Number of communication round
   total_round_num: 1000
   # Saving path for ckpt
-  save_to: "roberta-sst2-fed.ckpt"
+  save_to: "roberta-qnli-fed.ckpt"
   # Number of dataset being split
   client_num: 3
   # Enable for saving memory, all workers share the same model instance
@@ -78,7 +78,7 @@ data:
   # Root directory where the data stored
   root: sst2/
   # Dataset name
-  type: 'sst2.json@llm'
+  type: 'qnli.json@llm'
   # Train/val/test splits
   splits: [0.89,0.1,0.01]
   # Use meta inforamtion to split `rosetta_alpaca`
@@ -95,18 +95,18 @@ llm:
     max_history_len: 10
   # Path for store model cache, default in `~/.cache/`
   cache:
-    model: '/h/chensy/FS-LLM/model/'
+    model: '/home/niuniu/FS-LLM/model/'
   # PEFT related options
   adapter:
     # Set ture to enable PEFT fine-tuning
     use: True
     # Args for PEFT fine-tuning
-    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 2, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
+    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
 
 # DataLoader related options
 dataloader:
   # Batch size for iter loader
-  batch_size: 64
+  batch_size: 32
 
 # Model related options
 model:
@@ -122,15 +122,15 @@ train:
   # Optimizer related options
   optimizer:
     # Learning rate
-    lr: 0.01
+    lr: 0.005
     #type: Adam
     # Weight decay
     weight_decay: 0.0
   # Set ture to enable `model.half()`
-  # scheduler:
-  #   type: StepLR
-  #   step_size: 2000
-  #   gamma: 0.5
+  scheduler:
+    type: StepLR
+    step_size: 500
+    gamma: 0.5
   is_enable_half: False
 
 # Trainer related options
@@ -145,7 +145,7 @@ criterion:
 # Evaluation related options
 eval:
   # Frequency of evaluation
-  freq: 2
+  freq: 10
   # Evaluation metrics
   metrics: ['loss','acc']
   # Set key to track best model
