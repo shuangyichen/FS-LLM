@@ -198,7 +198,7 @@ class LLMDataset(Dataset):
                 return_tensors="pt",
                 padding="longest",
                 max_length=tokenizer.model_max_length,
-                truncation="longest_first") for idx, example in enumerate(examples)]
+                truncation=True) for idx, example in enumerate(examples)]
         input_ids = [
             tokenized.input_ids[0] for tokenized in tokenized_list
         ]

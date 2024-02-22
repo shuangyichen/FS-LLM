@@ -41,7 +41,7 @@
 
 # Whether to use GPU
 use_gpu: True
-
+seed: 5
 # Deciding which GPU to use
 device: 0
 
@@ -54,9 +54,9 @@ federate:
   # `standalone` or `distributed`
   mode: standalone
   # Number of communication round
-  total_round_num: 1000
+  total_round_num: 500
   # Saving path for ckpt
-  save_to: "roberta-qnli-fed.ckpt"
+  save_to: "roberta-mnli-fed.ckpt"
   # Number of dataset being split
   client_num: 3
   # Enable for saving memory, all workers share the same model instance
@@ -78,7 +78,7 @@ data:
   # Root directory where the data stored
   root: sst2/
   # Dataset name
-  type: 'qnli.json@llm'
+  type: 'mnli.json@llm'
   # Train/val/test splits
   splits: [0.89,0.1,0.01]
   # Use meta inforamtion to split `rosetta_alpaca`
@@ -86,7 +86,7 @@ data:
 # LLM related options
 llm:
   # Max token length for model input (training)
-  tok_len: 128
+  tok_len: 256
   # ChatBot related options
   chat:
     # Max token length for model input (inference)
@@ -101,7 +101,7 @@ llm:
     # Set ture to enable PEFT fine-tuning
     use: True
     # Args for PEFT fine-tuning
-    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
+    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 2, 'lora_alpha': 32, 'lora_dropout': 0.1 } ]
 
 # DataLoader related options
 dataloader:

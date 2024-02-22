@@ -23,7 +23,7 @@ class LLMTrainer(GeneralTorchTrainer):
         super(LLMTrainer, self).__init__(*args, **kwargs)
         print("Load CustomSeq2SeqTrainer...")
         self.step_count = 0
-        self.save_mode = False
+        self.save_mode = True
 
     def _hook_on_fit_start_numerical_precision(self, ctx):
         if self.cfg.train.is_enable_half:

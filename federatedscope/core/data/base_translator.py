@@ -89,9 +89,9 @@ class BaseDataTranslator:
         # test_size = 872
         
         #MNLI
-        # train_size = 388774
-        # val_size = 3928
-        # test_size = 9815
+        train_size = 388774
+        val_size = 3928
+        test_size = 9815
         
         #QQP
         # train_size = 360210
@@ -99,9 +99,9 @@ class BaseDataTranslator:
         # test_size = 40430
         
         #QNLI
-        train_size = 103695
-        val_size = 1048
-        test_size = 5463
+        # train_size = 103695
+        # val_size = 1048
+        # test_size = 5463
 
 
         if isinstance(dataset, Dataset):

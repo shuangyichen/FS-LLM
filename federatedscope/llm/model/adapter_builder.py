@@ -39,6 +39,9 @@ def enable_adapter(model, package, adapter, **kwargs):
             #     print(name)
             from peft import LoraConfig
             target_modu = [
+                "layer.15.attention.self.value","layer.15.attention.self.query",
+                "layer.16.attention.self.value","layer.16.attention.self.query",
+                "layer.17.attention.self.value","layer.17.attention.self.query",
                 "layer.18.attention.self.value","layer.18.attention.self.query",
                 "layer.19.attention.self.value","layer.19.attention.self.query",
                 "layer.20.attention.self.value","layer.20.attention.self.query",
@@ -46,11 +49,16 @@ def enable_adapter(model, package, adapter, **kwargs):
                 "layer.22.attention.self.value","layer.22.attention.self.query",
                 "layer.23.attention.self.value","layer.23.attention.self.query",
             ]
+            # target_modu = [
+            #     "layer.21.attention.self.value",
+            #     "layer.22.attention.self.value",
+            #     "layer.23.attention.self.value",
+            # ]
             # print("######################################################################")
             # print("######################################################################")
             # print("######################################################################")
             # peft_config = LoraConfig(task_type=TaskType.SEQ_CLS, target_modules=["layer.19.attention.self.value","layer.19.attention.self.query","layer.20.attention.self.value","layer.20.attention.self.query","layer.21.attention.self.value","layer.21.attention.self.query","layer.22.attention.self.value","layer.22.attention.self.query","layer.23.attention.self.value","layer.23.attention.self.query"],  **kwargs)
-            peft_config = LoraConfig(task_type=TaskType.SEQ_CLS, **kwargs) # target_modules=target_modu,  **kwargs)
+            peft_config = LoraConfig(task_type=TaskType.SEQ_CLS, target_modules=target_modu,  **kwargs)
             
             # peft_config = LoraConfig(task_type=TaskType.SEQ_CLS, target_modules=["value"], **kwargs)
             

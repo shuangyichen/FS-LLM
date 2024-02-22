@@ -18,7 +18,7 @@ def get_model_from_huggingface(model_name, config):
     kwargs = {}
     if len(config.llm.cache.model):
         kwargs['cache_dir'] = config.llm.cache.model
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2,**kwargs)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3,**kwargs)
     # print(model)
 
     return model#AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2,**kwargs)#AutoModelForCausalLM.from_pretrained(model_name, **kwargs)
