@@ -23,7 +23,7 @@ class LLMTrainer(GeneralTorchTrainer):
         super(LLMTrainer, self).__init__(*args, **kwargs)
         print("Load CustomSeq2SeqTrainer...")
         self.step_count = 0
-        self.save_mode = True
+        self.save_mode = False
 
     def _hook_on_fit_start_numerical_precision(self, ctx):
         if self.cfg.train.is_enable_half:
@@ -110,10 +110,10 @@ class LLMTrainer(GeneralTorchTrainer):
             print("Freeze classifier")
             for name, param in ctx.model.named_parameters():
                 # print(name)
-                # if 'lora_B' in name:
-                #     param.requires_grad = True
-                # if 'lora_A' in name:
-                #     param.requires_grad = False
+                if 'lora_B' in name:
+                    param.requires_grad = True
+                if 'lora_A' in name:
+                    param.requires_grad = False
                 if 'classifier' in name:
                     param.requires_grad = False
         self.step_count += 1

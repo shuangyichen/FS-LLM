@@ -78,7 +78,7 @@ class BaseDataTranslator:
                         'train, valid and test split.'
             assert len(dataset) == len(['train', 'val', 'test']), error_msg
             return [dataset[0], dataset[1], dataset[2]]
-
+        # print('dataset len', len(dataset))
         #index = np.random.permutation(np.arange(len(dataset)))
         #train_size = int(splits[0] * len(dataset))
         #val_size = int(splits[1] * len(dataset))
@@ -95,8 +95,13 @@ class BaseDataTranslator:
         
         #QQP
         # train_size = 360210
-        # val_size = 3639
+        # val_size = 3636
         # test_size = 40430
+        
+        #RTE 
+        # train_size = 2241
+        # val_size = 249
+        # test_size = 277
         
         #QNLI
         # train_size = 103695
