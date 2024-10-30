@@ -33,10 +33,16 @@ def enable_adapter(model, package, adapter, **kwargs):
             Prompt Tuning
             AdaLoRA
         """
-        from peft import get_peft_model, TaskType
+        from peft import get_peft_model
+        
         if adapter == 'lora':
-            from peft import LoraConfig
-            peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, **kwargs)
+            from peft import LoraConfig, TaskType
+            target_modu=['v_proj','q_proj','k_proj','o_proj']
+            # peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM,target_modules=target_modu, **kwargs)
+            # peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, layers_to_transform=[32,33,34,35,36,37,38,39],target_modules=target_modu,**kwargs)
+            peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, layers_to_transform=[24,25,26,27,28,29,30,31],target_modules=target_modu,**kwargs)
+            # peft_config.save("adapter_config.json")
+            # peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, **kwargs)
             model = get_peft_model(model, peft_config)
         elif adapter == 'prefix':
             from peft import PrefixTuningConfig
@@ -293,6 +299,8 @@ class AdapterModel(nn.Module):
         """
         ckpt = {'cur_round': state, 'model': self.model.state_dict()}
         torch.save(ckpt, path)
+        self.model.save_pretrained(path)
+        #print("ckpt saved at {}".format(path))
 
     # TODO: Fix `__getattr__`
     # def __getattr__(self, item):

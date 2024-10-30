@@ -15,7 +15,8 @@ from federatedscope.core.auxiliaries.worker_builder import get_client_cls, \
     get_server_cls
 from federatedscope.core.configs.config import global_cfg, CfgNode
 from federatedscope.core.auxiliaries.runner_builder import get_runner
-
+from huggingface_hub import login
+login(token='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')
 if os.environ.get('https_proxy'):
     del os.environ['https_proxy']
 if os.environ.get('http_proxy'):

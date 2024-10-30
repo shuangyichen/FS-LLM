@@ -85,10 +85,10 @@ def get_tokenizer(model_name, cache_dir, tok_len=128, pkg='huggingface_llm'):
         from transformers import AutoTokenizer
     elif pkg == 'modelscope_llm':
         from modelscope import AutoTokenizer
-
+    print("cache_dir",cache_dir)
     tokenizer = AutoTokenizer.from_pretrained(
         model_name,
-        cache_dir=cache_dir,
+        cache_dir='/scratch/ssd004/scratch/chensy/hf_home/',
         model_max_length=tok_len,
         padding_side="right",
         use_fast=False,

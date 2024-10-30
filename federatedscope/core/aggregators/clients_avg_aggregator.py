@@ -45,9 +45,12 @@ class ClientsAvgAggregator(Aggregator):
 
     def save_model(self, path, cur_round=-1):
         assert self.model is not None
-
+        # print("Client Avg Aggregator: Saving model to {}".format(path))
         ckpt = {'cur_round': cur_round, 'model': self.model.state_dict()}
-        torch.save(ckpt, path)
+        # torch.save(ckpt, path)
+        path = path.split(".")[0]
+        print("Client Avg Aggregator: Saving model to {}".format(path))
+        self.model.model.save_pretrained(path)
 
     def load_model(self, path):
         assert self.model is not None
